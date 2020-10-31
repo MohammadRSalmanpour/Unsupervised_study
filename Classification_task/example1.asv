@@ -1,0 +1,104 @@
+clear
+
+
+load('data4.mat');
+Data=AllSelextdataXY;
+
+allXdata = Data(:,2:end-1);
+
+
+allYdata = Data(:,end);
+
+DataNum = size(allXdata,1);
+
+InputNum = size(allXdata,2);
+OutputNum = size(allYdata,2);
+
+
+
+ max=77;
+ 
+% preduce train data
+ [r,c]=size(allXdata);
+ numTrain=ceil(65*r/100);
+
+
+%  preduce data train
+ XTrainData=allXdata(1:numTrain,:);
+numbertrain = size(XTrainData,1);
+ 
+ YTrainData=(allYdata(1:numTrain,:))';
+ feature_train=XTrainData;
+target_train=YTrainData;
+
+ 
+
+% preduce test data
+  XTestData=allXdata(numTrain:end,:);
+  numbertest = size(XTestData,1);
+
+ YTestData=(allYdata(numTrain:end,:))';
+
+
+
+opts= struct;
+ opts.depth= 6;
+opts.numTrees= 100;
+opts.numSplits= 5;
+opts.verbose= true;
+opts.classifierID= 3; % weak learners to use. Can be an array for mix of weak learners too
+
+
+
+             % train
+
+    
+  for it=1:10
+m= forestTrain(feature_train,target_train,opts);
+yhatTrain = forestTest(m, feature_train);
+
+Abserroetrain=sum(abs(YTrainData-yhatTrain));
+Abserrortrain=77*Abserroetrain/numbertrain;
+
+abserrorsun(it)=Abserrortrain;
+menabserrortrain=mean(abserrorsun(:));
+
+end %for
+      
+
+
+               % Test
+
+for it=1:10
+    
+yhatTest = forestTest(m,XTestData);
+Abserrortest=sum(abs(YTestData-yhatTest));
+
+Abserrortestn=77*Abserrortest/numbertest;
+
+abserrorsuntest(it)=Abserrortestn;
+
+meanabserrortest=mean(abserrorsuntest(:));
+end
+
+
+ if SaveResults==1
+
+        dirname=['ResultRF/Data' num2str(i) '/Workspace'];
+        mkdir(dirname);
+
+        filename=strcat(dirname,'/set_',num2str(F),'.mat');
+        save(filename);
+
+        dirname=['ResultRF/Data' num2str(i) '/Figures'];
+        mkdir(dirname);
+
+        filename=strcat(dirname,'/set_',num2str(F),'.fig');
+        savefig(filename);
+        
+    end %if
+
+
+
+
+
